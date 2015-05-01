@@ -1,0 +1,37 @@
+{
+    "name":                                             "darsyn/fly-bundle",
+    "license":                                          "MIT",
+    "type":                                             "symfony-bundle",
+    "description":                                      "A bundle for creating the PHP League's Flysystem and multiple adapters as container services.",
+    "autoload": {
+        "psr-4": {
+            "Darsyn\\Bundle\\FlyBundle\\":              "src/"
+        }
+    },
+    "authors": [
+        {
+            "name":                                     "Zander Baldwin",
+            "email":                                    "mynameiszanders@gmail.com",
+            "homepage":                                 "http://zanderbaldwin.com",
+            "role":                                     "Developer"
+        }
+    ],
+    "require": {
+        "symfony/http-kernel":                          "~2.3",
+        "symfony/dependency-injection":                 "~2.3",
+        "symfony/config":                               "~2.3",
+        "league/flysystem":                             "~1.0",
+        "php":                                          ">=5.4"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer":                    "@stable",
+        "phpmd/phpmd":                                  "@stable",
+        "phpunit/phpunit":                              "@stable",
+        "humbug/humbug":                                "*"
+    },
+    "minimum-stability":                                "dev",
+    "prefer-stable":                                    true,
+    "config": {
+        "preferred-install":                            "dist"
+    }
+}

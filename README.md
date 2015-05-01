@@ -82,6 +82,11 @@ services:
         arguments:  [ @s3_client, %amazon.bucket% ]
         tags:
             - { name: darsyn_fly.adapter, protocol: amazon }
+    my_second_amazon_flyadapter:
+        class:      League\Flysystem\AwsS3v3\AwsS3Adapter
+        arguments:  [ @s3_client, "storagebucket" ]
+        tags:
+            - { name: darsyn_fly.adapter, protocol: amazon2 }
 
     dropbox_client:
         class:      Dropbox\Client
@@ -106,6 +111,10 @@ class YourController extends Controller
         $flysystem->move(
             'dropbox://Employment/MyCompany/WorkFromHome/MeetingMinutes.doc',
             'amazon://FinancialDepartment/Meetings/2015-05-01/MayDayMinutes.doc'
+        );
+        $flysystem->copy(
+            'amazon://FinancialDepartment/Meetings/2015-05-01/MayDayMinutes.doc',
+            'amazon2://FinancialDepartment/Meetings/2015-05-01/MayDayMinutes.doc'
         );
     }
 }

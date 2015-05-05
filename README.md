@@ -182,8 +182,22 @@ darsyn_fly:
     alias: flysystem
 ```
 
-Authors and Contributing
-------------------------
+## Flysystem Plugins
+
+Defining plugins to be applied to the mount manager is the same as defining adapters, but tagged with `flysystem.plugin` instead (and no attributes are required).
+
+The class defined in the service definition **must** implement `League\Flysystem\PluginInterface`.
+
+```yaml
+services:
+
+    my_example_plugin
+        class: AppBundle\FlyPlugin\Example
+        tags:
+            - { name: flysystem.plugin }
+```
+
+## Authors and Contributing
 
 Current authors include:
 

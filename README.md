@@ -191,7 +191,7 @@ The class defined in the service definition **must** implement `League\Flysystem
 ```yaml
 services:
 
-    my_example_plugin
+    my_example_plugin:
         class: AppBundle\FlyPlugin\Example
         tags:
             - { name: flysystem.plugin }

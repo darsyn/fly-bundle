@@ -1,16 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: zander
- * Date: 05/05/15
- * Time: 16:50
- */
 
 namespace Darsyn\Bundle\FlyBundle\DependencyInjection;
 
 use Darsyn\Bundle\FlyBundle\DarsynFlyBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
@@ -21,10 +18,10 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 class MountManagerCompilerPass implements CompilerPassInterface
 {
-    const CONTAINER_TAG = 'darsyn_fly.adapter';
-
     /**
-     * Process
+     * Process the service container.
+     * We don't have to worry about speed or performance (as much as we would in a normal request) as this gets compiled
+     * to cache ahead-of-time.
      *
      * @access public
      * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
@@ -33,16 +30,36 @@ class MountManagerCompilerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         if (!$container->has(DarsynFlyBundle::SERVICE_NAME)) {
-            return null;
+            throw new ServiceNotFoundException(DarsynFlyBundle::SERVICE_NAME);
         }
         $mountManager = $container->findDefinition(DarsynFlyBundle::SERVICE_NAME);
-        $taggedServices = $container->findTaggedServiceIds(DarsynFlyBundle::TAG_NAME);
 
-        foreach ($taggedServices as $id => $tags) {
-            $definition->addMethodCall('mountFilesystem', [
-                new Reference($id),
-                $tags['protocol']
-            ]);
+        // Iterate through each service we found tagged with the adapter tag.
+        foreach ($container->findTaggedServiceIds(DarsynFlyBundle::ADAPTER_TAG) as $id => $tags) {
+            foreach ($tags as $attr) {
+                if (!isset($attr['scheme']) || !preg_match('/^[a-z][a-z\\d\\.\\+-]*$/i', $attr['scheme'])) {
+                    throw new InvalidArgumentException(sprintf(
+                        'Invalid scheme set for tagged Flysystem adapter service "%s".',
+                        $id
+                    ));
+                }
+                $mountManager->addMethodCall('mountFilesystem', [
+                    $attr['scheme'],
+                    new Definition('League\\Flysystem\\Filesystem', [
+                        new Reference($id),
+                    ]),
+                ]);
+            }
+        }
+
+        // Iterate through each service we found tagged with the plugin tag.
+        foreach ($container->findTaggedServiceIds(DarsynFlyBundle::PLUGIN_TAG) as $id => $tags) {
+            foreach ($tags as $attributes) {
+                $reflection = new \ReflectionClass($container->findDefinition($id)->getClass());
+                if ($reflection->isSubclassOf('League\\Flysystem\\PluginInterface') && !$reflection->isAbstract()) {
+                    $mountManager->addMethodCall('addPlugin', [new Reference($id)]);
+                }
+            }
         }
     }
 }

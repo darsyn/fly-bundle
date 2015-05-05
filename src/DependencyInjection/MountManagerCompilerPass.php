@@ -8,6 +8,7 @@
 
 namespace Darsyn\Bundle\FlyBundle\DependencyInjection;
 
+use Darsyn\Bundle\FlyBundle\DarsynFlyBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Reference;
@@ -31,11 +32,11 @@ class MountManagerCompilerPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->has(static::CONTAINER_TAG)) {
+        if (!$container->has(DarsynFlyBundle::SERVICE_NAME)) {
             return null;
         }
-        $definition = $container->findDefinition(static::CONTAINER_TAG);
-        $taggedServices = $container->findTaggedServiceIds(static::CONTAINER_TAG);
+        $mountManager = $container->findDefinition(DarsynFlyBundle::SERVICE_NAME);
+        $taggedServices = $container->findTaggedServiceIds(DarsynFlyBundle::TAG_NAME);
 
         foreach ($taggedServices as $id => $tags) {
             $definition->addMethodCall('mountFilesystem', [

@@ -54,11 +54,8 @@ class MountManagerCompilerPass implements CompilerPassInterface
 
         // Iterate through each service we found tagged with the plugin tag.
         foreach ($container->findTaggedServiceIds(DarsynFlyBundle::PLUGIN_TAG) as $id => $tags) {
-            foreach ($tags as $attributes) {
-                $reflection = new \ReflectionClass($container->findDefinition($id)->getClass());
-                if ($reflection->isSubclassOf('League\\Flysystem\\PluginInterface') && !$reflection->isAbstract()) {
-                    $mountManager->addMethodCall('addPlugin', [new Reference($id)]);
-                }
+            foreach ($tags as $attr) {
+                $mountManager->addMethodCall('addPlugin', [new Reference($id)]);
             }
         }
     }

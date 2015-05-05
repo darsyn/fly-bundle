@@ -14,8 +14,9 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 class DarsynFlyBundle extends Bundle
 {
-    const SERVICE_NAME = 'flysystem';
-    const TAG_NAME = 'flysystem.adapter';
+    const SERVICE_NAME  = 'darsyn_fly';
+    const ADAPTER_TAG   = 'flysystem.adapter';
+    const PLUGIN_TAG    = 'flysystem.plugin';
 
     /**
      * Build

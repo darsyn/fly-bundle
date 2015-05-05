@@ -25,21 +25,27 @@ class DarsynFlyExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $projectAdapter = new Definition('League\\Flysystem\\Adapter\\Local', [
-            $container->getParameter('kernel.root_dir') . '/../'
-        ]);
-        $projectAdapter->addTag(DarsynFlyBundle::TAG_NAME, ['protocol' => 'project']);
+        // Set the main service definition.
+        $container->setDefinition(
+            DarsynFlyBundle::SERVICE_NAME,
+            $mountManager = new Definition('League\\Flysystem\\MountManager')
+        );
 
-        $mountManager = new Definition('League\\Flysystem\\MountManager');
-        $container->addDefinitions([
-            DarsynFlyBundle::SERVICE_NAME => $mountManager,
-            'darsyn_fly.adapter.project' => $projectAdapter,
-        ]);
-
-        if (isset($config['alias']) && !empty($config['alias'])) {
-            $container->addAliases([
-                $config['alias'] => 'darsyn_fly',
+        // If the configuration allows it, create a primary Local adapter at the root directory of the project.
+        if (is_string($config['project_adapter']) && !empty($config['project_adapter'])) {
+            $projectAdapter = new Definition('League\\Flysystem\\Adapter\\Local', [
+                $container->getParameter('kernel.root_dir') . '/../'
             ]);
+            $projectAdapter->addTag(DarsynFlyBundle::ADAPTER_TAG, ['scheme' => $config['project_adapter']]);
+            $container->setDefinition(
+                sprintf('%s.adapter.%s', DarsynFlyBundle::SERVICE_NAME, $config['project_adapter']),
+                $projectAdapter
+            );
+        }
+
+        // If the configuration has set an alias ("flysystem" by default), set it here.
+        if (isset($config['alias']) && is_string($config['alias']) && !empty($config['alias'])) {
+            $container->setAlias($config['alias'], DarsynFlyBundle::SERVICE_NAME);
         }
     }
 }

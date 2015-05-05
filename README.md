@@ -94,6 +94,8 @@ To define Flysystem adapters, tag your service definitions with `slysystem.adapt
 (restricted to a letter followed by any number of letters, numbers, hyphens, period or plus signs; see section 3.1 of
 RFC 3986).
 
+The class defined by the tagged service definition **must** implement `League\Flysystem\AdapterInterface`.
+
 The following example shows how to implement adapters for Amazon's S3 and Dropbox:
 
 ```yaml

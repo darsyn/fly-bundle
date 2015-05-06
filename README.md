@@ -116,7 +116,7 @@ services:
     s3_client:
         class:      Aws\S3\S3Client
         factory:    [ Aws\S3\S3Client, factory ]
-        arguments:  [ { credentials: @amazon.credentials } ]
+        arguments:  [ { credentials: @aws_credentials } ]
     dropbox_client:
         class:      Dropbox\Client
         arguments:  [ %dropbox.access_token%, %dropbox.client_identifier% ]
@@ -180,6 +180,36 @@ The `darsyn_fly` service will always be available.
 ```yaml
 darsyn_fly:
     alias: flysystem
+```
+
+## Caching
+
+Cache can be enabled globally for all adapters in the configuration via the `darsyn_fly.cache` setting, but also per
+adapter in its service configuration by adding the `cache` attribute to an adapter tag.
+
+The class defined in the service definition **must** implement `League\Flysystem\Cached\CachedInterface`.
+
+```yaml
+services:
+
+    global_cache_provider:
+        class: League\Flysystem\Cached\Storage\Memory
+    
+    adapter_cache_provider:
+        class: League\Flysystem\Cached\Storage\Predis
+
+    dropbox_client:
+        class:      Dropbox\Client
+        arguments:  [ %dropbox.access_token%, %dropbox.client_identifier% ]
+
+    my_dropbox_adapter:
+        class:      League\Flysystem\Dropbox\DropboxAdapter
+        arguments:  [ @dropbox_client ]
+        tags:
+            - { name: flysystem.adapter, scheme: dropbox, cache: adapter_cache_provider }
+
+darsyn_fly:
+    cache: global_cache_provider
 ```
 
 ## Flysystem Plugins

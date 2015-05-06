@@ -32,21 +32,39 @@ class MountManagerCompilerPass implements CompilerPassInterface
         if (!$container->has(DarsynFlyBundle::SERVICE_NAME)) {
             throw new ServiceNotFoundException(DarsynFlyBundle::SERVICE_NAME);
         }
-        $mountManager = $container->findDefinition(DarsynFlyBundle::SERVICE_NAME);
+        $mountManagerDefinition = $container->findDefinition(DarsynFlyBundle::SERVICE_NAME);
+
+        $cacheServiceReference = null;
+        if ($container->hasParameter('darsyn_fly.cache_service')) {
+            $cacheServiceReference = new Reference($container->getParameter('darsyn_fly.cache_service'));
+        }
 
         // Iterate through each service we found tagged with the adapter tag.
         foreach ($container->findTaggedServiceIds(DarsynFlyBundle::ADAPTER_TAG) as $id => $tags) {
             foreach ($tags as $attr) {
+                // Make sure that a valid scheme has been defined.
                 if (!isset($attr['scheme']) || !preg_match('/^[a-z][a-z\\d\\.\\+-]*$/i', $attr['scheme'])) {
                     throw new InvalidArgumentException(sprintf(
                         'Invalid scheme set for tagged Flysystem adapter service "%s".',
                         $id
                     ));
                 }
-                $mountManager->addMethodCall('mountFilesystem', [
+                // Check if we should wrap this in a cache service.
+                $adapterDefinition = new Reference($id);
+                if (!empty($cacheServiceReference) || isset($attr['cache'])) {
+                    $adapterCacheServiceDefinition = isset($attr['cache'])
+                        ? new Reference($attr['cache'])
+                        : $cacheServiceReference;
+                    $adapterDefinition = new Definition('League\\Flysystem\\Cached\\CachedAdapter', [
+                        new Reference($id),
+                        $adapterCacheServiceDefinition
+                    ]);
+                }
+                // Add the adapter to the mount manager service definition.
+                $mountManagerDefinition->addMethodCall('mountFilesystem', [
                     $attr['scheme'],
                     new Definition('League\\Flysystem\\Filesystem', [
-                        new Reference($id),
+                        $adapterDefinition,
                     ]),
                 ]);
             }
@@ -55,7 +73,7 @@ class MountManagerCompilerPass implements CompilerPassInterface
         // Iterate through each service we found tagged with the plugin tag.
         foreach ($container->findTaggedServiceIds(DarsynFlyBundle::PLUGIN_TAG) as $id => $tags) {
             foreach ($tags as $attr) {
-                $mountManager->addMethodCall('addPlugin', [new Reference($id)]);
+                $mountManagerDefinition->addMethodCall('addPlugin', [new Reference($id)]);
             }
         }
     }

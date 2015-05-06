@@ -23,6 +23,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('alias')->defaultValue('flysystem')->end()
                 ->scalarNode('project_adapter')->defaultValue('project')->end()
+                ->scalarNode('cache')->defaultValue(null)->end()
             ->end();
 
         // Here you should define the parameters that are allowed to

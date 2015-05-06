@@ -8,6 +8,7 @@ use League\Flysystem\Filesystem;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
@@ -18,7 +19,12 @@ use Symfony\Component\DependencyInjection\Loader;
 class DarsynFlyExtension extends Extension
 {
     /**
-     * {@inheritdoc}
+     * Load Configuration
+     *
+     * @access public
+     * @param array $configs
+     * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
+     * @return void
      */
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -30,6 +36,14 @@ class DarsynFlyExtension extends Extension
             DarsynFlyBundle::SERVICE_NAME,
             $mountManager = new Definition('League\\Flysystem\\MountManager')
         );
+
+        // Cache service configuration.
+        if (!empty($config['cache'])) {
+            if (!$container->has($config['cache'])) {
+                throw new ServiceNotFoundException($config['cache']);
+            }
+            $container->setParameter('darsyn_fly.cache_service', $config['cache']);
+        }
 
         // If the configuration allows it, create a primary Local adapter at the root directory of the project.
         if (is_string($config['project_adapter']) && !empty($config['project_adapter'])) {

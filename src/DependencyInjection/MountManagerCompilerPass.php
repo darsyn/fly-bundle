@@ -32,21 +32,23 @@ class MountManagerCompilerPass implements CompilerPassInterface
         if (!$container->has(DarsynFlyBundle::SERVICE_NAME)) {
             throw new ServiceNotFoundException(DarsynFlyBundle::SERVICE_NAME);
         }
-        $mountManager = $container->findDefinition(DarsynFlyBundle::SERVICE_NAME);
+        $mountManagerDefinition = $container->findDefinition(DarsynFlyBundle::SERVICE_NAME);
 
         // Iterate through each service we found tagged with the adapter tag.
         foreach ($container->findTaggedServiceIds(DarsynFlyBundle::ADAPTER_TAG) as $id => $tags) {
             foreach ($tags as $attr) {
+                // Make sure that a valid scheme has been defined.
                 if (!isset($attr['scheme']) || !preg_match('/^[a-z][a-z\\d\\.\\+-]*$/i', $attr['scheme'])) {
                     throw new InvalidArgumentException(sprintf(
                         'Invalid scheme set for tagged Flysystem adapter service "%s".',
                         $id
                     ));
                 }
-                $mountManager->addMethodCall('mountFilesystem', [
+                $adapterDefinition = new Reference($id);
+                $mountManagerDefinition->addMethodCall('mountFilesystem', [
                     $attr['scheme'],
                     new Definition('League\\Flysystem\\Filesystem', [
-                        new Reference($id),
+                        $adapterDefinition,
                     ]),
                 ]);
             }

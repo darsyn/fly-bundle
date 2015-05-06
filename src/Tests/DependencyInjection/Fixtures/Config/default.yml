@@ -1,0 +1,4 @@
+darsyn_fly:
+    cache: ~
+    project_adapter: project
+    alias: flysystem

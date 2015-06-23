@@ -51,6 +51,10 @@ class MountManagerCompilerPass implements CompilerPassInterface
                 }
                 // Check if we should wrap this in a cache service.
                 $adapterDefinition = new Reference($id);
+                // Throw an exception if the adapter-specific cache provider was not found.
+                if (isset($attr['cache']) && !$container->has($attr['cache'])) {
+                    throw new ServiceNotFoundException($attr['cache']);
+                }
                 if (!empty($cacheServiceReference) || isset($attr['cache'])) {
                     $adapterCacheServiceDefinition = isset($attr['cache'])
                         ? new Reference($attr['cache'])

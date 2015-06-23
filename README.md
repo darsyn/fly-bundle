@@ -90,7 +90,7 @@ Now that the bundle has been enabled, it will search for any services that you d
 
 ### Defining Adapters
 
-To define Flysystem adapters, tag your service definitions with `slysystem.adapter` and add a scheme attribute
+To define Flysystem adapters, tag your service definitions with `flysystem.adapter` and add a scheme attribute
 (restricted to a letter followed by any number of letters, numbers, hyphens, period or plus signs; see section 3.1 of
 RFC 3986).
 

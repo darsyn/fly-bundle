@@ -11,28 +11,17 @@
     "authors": [
         {
             "name":                                     "Zander Baldwin",
-            "email":                                    "mynameiszanders@gmail.com",
+            "email":                                    "hello@zanderbaldwin.com",
             "homepage":                                 "http://zanderbaldwin.com",
             "role":                                     "Developer"
         }
     ],
     "require": {
-        "symfony/http-kernel":                          "~2.3",
-        "symfony/dependency-injection":                 "~2.3",
-        "symfony/config":                               "~2.3",
+        "symfony/http-kernel":                          "~2.3|^3.0",
+        "symfony/dependency-injection":                 "~2.3|^3.0",
+        "symfony/config":                               "~2.3|^3.0",
         "league/flysystem":                             "~1.0",
         "league/flysystem-cached-adapter":              "~1.0",
         "php":                                          ">=5.4"
-    },
-    "require-dev": {
-        "squizlabs/php_codesniffer":                    "@stable",
-        "phpmd/phpmd":                                  "@stable",
-        "phpunit/phpunit":                              "@stable",
-        "humbug/humbug":                                "*"
-    },
-    "minimum-stability":                                "dev",
-    "prefer-stable":                                    true,
-    "config": {
-        "preferred-install":                            "dist"
     }
 }
